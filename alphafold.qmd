@@ -1,0 +1,103 @@
+--- 
+title: "Alphafold"
+software:
+- 'https://deepmind.google/technologies/alphafold/'
+login:
+- webapp-sso
+os_flavor: linux
+os:
+- Ubuntu 22.04
+data: []
+packages: []
+gpu: true
+admin: false
+support: UU
+---
+
+## Description
+AlphaFold is an artificial intelligence (AI) program developed by DeepMind, a subsidiary of Alphabet, which performs predictions of protein structure.
+
+
+## Creating an alphafold instance in VRE
+
+### Preparation
+
+Data parameters
+
+The data parameters need to be requested by your own group by filling in this <a href='https://forms.gle/svvpY4u2jsHEwWYS6'>form</a>. According to the <a href='https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md'>alphafold documentation</a>, you will get a response within 2-3 business days. 
+
+Download the model parameter to your local computer.
+
+### Installation
+- Open the <a href='https://portal.live.surfresearchcloud.nl/'>SURF Research Cloud portal</a>
+- Create a new storage by clicking the "Create New" button in the "Create new storage" card that is located on the top middle of the screen. Make sure to choose the capacity of 1.5 TB for the storage.
+- After the storage is created, you can proceed to creating a new workspace.
+- Create a new workspace by clicking the "Create New" button in the "Create new workspace" card that is located on the top left of the screen. (For a more detailed explanation, see the manual on <a href='https://utrechtuniversity.github.io/vre-docs/docs/manuals/creating.html'>How to create a workspace</a>)
+- You will be redirected to the "Create your workspace" page.
+- On this page, there are several attributes that need to be configured.
+![alt](workspace-1.png)
+- Collaborative organization (clear)
+- Wallet (clear)
+- Catalog item: "Alphafold test Dawa"
+- Flavor: choose a min A10 1 GPU (depends on the availability of the GPU resources)
+- Storage: choose your newly created storage from the previous steps
+- Workspace name (clear)
+- hostname (clear)
+- Description (clear)
+- Click "Submit"
+- It will take 15-30 minutes for the new workspace to be configured
+
+
+### Configuration
+After the configuration is finished, there will be a new workspace that you can access via ssh. Click this <a href="https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/9798290/Log+in+to+your+workspace">link</a> on how to login to your workspace using ssh.
+
+Inside the workspace, you will have two components:
+
+- Docker. To check, use this command
+
+    ```
+    $ docker images
+    ```
+
+- Public (genetic) databases. To check, use this command
+
+    ```
+    $ ls /data/<permanent_storage_name>/alphafold3/
+    ```
+    There should be a folder named "public_databases" with genetic database files (*.fasta) within the folder.
+
+
+Upload the model parameter from your local computer to the workspace.
+
+- Open cli (terminal/PowerShell/WSL)
+- Go to the directory of the model parameter
+- Use scp to transfer the model parameter file to the workspace
+
+    ```
+    C:\> scp af3.bin.zst someone@123.11.22.33:/home/someone/data/
+    ```
+
+Create or upload input file. Example of the input file can be found <a href='https://github.com/google-deepmind/alphafold3?tab=readme-ov-file#installation-and-running-your-first-prediction'>here</a>.
+
+Final step is to run alphafold using this command. Adjust the directories for model parameter, input file, output file, and genetic databases to your workspace.    
+
+
+    $ docker run -it \
+        --volume /home/<your_login_name>/data/<permanent_storage_name>/af_input:/root/af_input \
+        --volume /home/<your_login_name>/data/<permanent_storage_name>/af_output:/root/af_output \
+        --volume /home/<your_login_name>/data/<permanent_storage_name>/model_parameter:/root/models \
+        --volume /home/<your_login_name>/data/<permanent_storage_name>/gendb:/root/public_databases \
+        --gpus all \
+        alphafold3 \
+        python run_alphafold.py \
+        --json_path=/root/af_input/af_input.json \
+        --model_dir=/root/models \
+        --output_dir=/root/af_output
+
+   
+
+## Source
+
+[1] "AlphaFold". Deepmind. Archived from the original on 19 January 2021. Retrieved 30 November 2020.
+
+[2] https://en.wikipedia.org/wiki/AlphaFold
